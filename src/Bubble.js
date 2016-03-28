@@ -2,7 +2,7 @@ import React, {Text, View, Animated, Image, StyleSheet} from 'react-native';
 
 let styles = StyleSheet.create({
   bubble: {
-    borderRadius: 15,
+    borderRadius: 5,
     paddingLeft: 14,
     paddingRight: 14,
     paddingBottom: 10,
@@ -17,12 +17,12 @@ let styles = StyleSheet.create({
     color: '#fff',
   },
   bubbleLeft: {
-    marginRight: 70,
+    marginRight: 30,
     backgroundColor: '#e6e6eb',
     alignSelf: "flex-start",
   },
   bubbleRight: {
-    marginLeft: 70,
+    marginLeft: 30,
     backgroundColor: '#007aff',
     alignSelf: "flex-end"
   },

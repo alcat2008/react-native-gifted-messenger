@@ -22,7 +22,7 @@ var GiftedMessengerExample = React.createClass({
       {
         text: "Yes, and I use Gifted Messenger!", 
         name: 'Developer', 
-        image: null, 
+        image: {uri: 'https://facebook.github.io/react/img/logo_og.png'},
         position: 'right', 
         date: new Date(2015, 10, 17, 19, 0)
         // If needed, you can add others data (eg: userId, messageId)
@@ -107,6 +107,9 @@ var GiftedMessengerExample = React.createClass({
             backgroundColor: '#007aff',
           },
         }}
+
+        displayNames={false}
+        displayNamesInsideBubble={false}
         
         autoFocus={false}
         messages={this.getMessages()}
@@ -117,9 +120,11 @@ var GiftedMessengerExample = React.createClass({
         onLoadEarlierMessages={this.onLoadEarlierMessages}
 
         senderName='Developer'
-        senderImage={null}
+        senderImage={{uri: 'https://facebook.github.io/react/img/logo_og.png'}}
         onImagePress={this.onImagePress}
-        displayNames={true}
+        //displayNames={true}
+        forceRenderImage={true}
+        renderStatus={false}
         
         parseText={true} // enable handlePhonePress and handleUrlPress
         handlePhonePress={this.handlePhonePress}

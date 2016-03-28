@@ -55,6 +55,7 @@ var GiftedMessenger = React.createClass({
       keyboardShouldPersistTaps: true,
       submitOnReturn: false,
       forceRenderImage: false,
+      renderStatus: false,
       onChangeText: (text) => {},
       autoScroll: false,
     };
@@ -90,6 +91,7 @@ var GiftedMessenger = React.createClass({
     keyboardDismissMode: React.PropTypes.string,
     keyboardShouldPersistTaps: React.PropTypes.bool,
     forceRenderImage: React.PropTypes.bool,
+    renderStatus: React.PropTypes.bool,
     onChangeText: React.PropTypes.func,
     autoScroll: React.PropTypes.bool,
   },
@@ -200,6 +202,7 @@ var GiftedMessenger = React.createClass({
           diffMessage={diffMessage}
           position={rowData.position}
           forceRenderImage={this.props.forceRenderImage}
+          renderStatus={this.props.renderStatus}
           onImagePress={this.props.onImagePress}
           onMessageLongPress={this.props.onMessageLongPress}
           renderCustomText={this.props.renderCustomText}

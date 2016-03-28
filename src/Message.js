@@ -26,7 +26,7 @@ var styles = StyleSheet.create({
   },
   image: {
     alignSelf: 'center',
-    borderRadius: 15,
+    borderRadius: 3,
   },
   imageLeft: {
   },
@@ -117,7 +117,7 @@ export default class Message extends React.Component {
   }
 
   renderStatus(status){
-    if (status !== 'ErrorButton' && typeof status === 'string') {
+    if (this.props.renderStatus && status !== 'ErrorButton' && typeof status === 'string') {
       if (status.length > 0) {
         return (
           <View>
