@@ -1,6 +1,7 @@
 import React, {View, Text, StyleSheet, TouchableHighlight, Image} from 'react-native';
 import Bubble from './Bubble';
 import ErrorButton from './ErrorButton';
+import Angle from './Angle';
 
 var styles = StyleSheet.create({
   rowContainer: {
@@ -129,6 +130,22 @@ export default class Message extends React.Component {
     return null;
   }
 
+  _renderAngle(rowData) {
+    if (rowData.position === 'left') {
+      return (
+        <Angle direction='left' color={this.props.leftBackgroundColor} />
+      );
+    }
+
+    let bgColor = this.props.rightBackgroundColor;
+    if (rowData.status === 'ErrorButton') {
+      bgColor = this.props.errorBackgroundColor;
+    }
+    return (
+      <Angle direction='right' color={bgColor} />
+    );
+  }
+
   render(){
 
     var {
@@ -161,12 +178,17 @@ export default class Message extends React.Component {
           }]}>
           {position === 'left' ? this.renderImage(rowData, rowID, diffMessage, forceRenderImage, onImagePress) : null}
           {position === 'right' ? this.renderErrorButton(rowData, rowID, onErrorButtonPress) : null}
+          {position === 'left' ? this._renderAngle(rowData) : null}
           <RowView
             {...rowData}
             renderCustomText={this.props.renderCustomText}
             styles={styles}
             name={position === 'left' && this.props.displayNamesInsideBubble ? this.renderName(rowData.name, displayNames, diffMessage) : null}
+            leftBackgroundColor={this.props.leftBackgroundColor}
+            rightBackgroundColor={this.props.rightBackgroundColor}
+            errorBackgroundColor={this.props.errorBackgroundColor}
             />
+          {position === 'right' ? this._renderAngle(rowData) : null}
           {rowData.position === 'right' ? this.renderImage(rowData, rowID, diffMessage, forceRenderImage, onImagePress) : null}
         </View>
         {rowData.position === 'right' ? this.renderStatus(rowData.status) : null}
@@ -186,3 +208,17 @@ export default class Message extends React.Component {
     }
   }
 }
+
+Message.propTypes = {
+  leftBackgroundColor: React.PropTypes.string,
+  rightBackgroundColor: React.PropTypes.string,
+  errorBackgroundColor: React.PropTypes.string
+};
+
+
+Message.defaultProps = {
+  leftBackgroundColor: '#e6e6eb',
+  rightBackgroundColor: '#007aff',
+  errorBackgroundColor: '#e01717'
+};
+
