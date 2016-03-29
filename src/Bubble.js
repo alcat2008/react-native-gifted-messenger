@@ -1,5 +1,7 @@
 import React, {Text, View, Animated, Image, StyleSheet} from 'react-native';
 
+import Angle from './Angle';
+
 let styles = StyleSheet.create({
   bubble: {
     borderRadius: 5,
@@ -15,21 +17,7 @@ let styles = StyleSheet.create({
   },
   textRight: {
     color: '#fff',
-  },
-  bubbleLeft: {
-    marginRight: 30,
-    backgroundColor: '#e6e6eb',
-    alignSelf: "flex-start",
-  },
-  bubbleRight: {
-    marginLeft: 30,
-    backgroundColor: '#007aff',
-    alignSelf: "flex-end"
-  },
-  bubbleError: {
-    backgroundColor: '#e01717'
-  },
-
+  }
 });
 
 export default class Bubble extends React.Component {
@@ -54,28 +42,69 @@ export default class Bubble extends React.Component {
     );
   }
 
-  render(){
-    var flexStyle = {};
-    if ( this.props.text.length > 40 ) {
-     flexStyle.flex = 1;
+  _renderAngle() {
+    if (this.props.position === 'left') {
+      return (
+        <Angle direction='left' color={this.props.leftBackgroundColor} />
+      );
+    }
+
+    let bgColor = this.props.rightBackgroundColor;
+    if (this.props.status === 'ErrorButton') {
+      bgColor = this.props.errorBackgroundColor;
+    }
+    return (
+      <Angle direction='right' color={bgColor} />
+    );
+  }
+
+  render() {
+    let flexStyle = {};
+    if (this.props.text.length > 40) {
+      flexStyle.flex = 1;
+    }
+
+    let customStyle = {};
+    if (this.props.position === 'left') {
+      customStyle = {
+        marginRight: 30,
+        backgroundColor: this.props.leftBackgroundColor,
+        alignSelf: 'flex-start'
+      };
+    } else {
+      customStyle = {
+        marginLeft: 30,
+        backgroundColor: this.props.status === 'ErrorButton' ? this.props.errorBackgroundColor : this.props.rightBackgroundColor,
+        alignSelf: 'flex-end'
+      };
     }
 
     return (
-      <View style={[styles.bubble,
-        (this.props.position === 'left' ? styles.bubbleLeft : styles.bubbleRight),
-        (this.props.status === 'ErrorButton' ? styles.bubbleError : null),
-        flexStyle]}>
-        {this.props.name}
-        {this.renderText(this.props.text, this.props.position)}
+      <View style={{flexDirection: 'row'}}>
+        {this.props.position === 'left' ? this._renderAngle() : null}
+        <View style={[styles.bubble, customStyle, flexStyle]}>
+          {this.props.name}
+          {this.renderText(this.props.text, this.props.position)}
+        </View>
+        {this.props.position === 'right' ? this._renderAngle() : null}
       </View>
-    )
+    );
   }
 }
 
 Bubble.propTypes = {
-  position: React.PropTypes.oneOf(['left','right']),
+  position: React.PropTypes.oneOf(['left', 'right']),
   status: React.PropTypes.string,
   text: React.PropTypes.string,
   renderCustomText: React.PropTypes.func,
-  name: React.PropTypes.element
-}
+  name: React.PropTypes.element,
+  leftBackgroundColor: React.PropTypes.string,
+  rightBackgroundColor: React.PropTypes.string,
+  errorBackgroundColor: React.PropTypes.string
+};
+
+Bubble.defaultProps = {
+  leftBackgroundColor: '#e6e6eb',
+  rightBackgroundColor: '#007aff',
+  errorBackgroundColor: '#e01717'
+};
