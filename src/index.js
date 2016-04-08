@@ -16,7 +16,8 @@ var {
   TouchableHighlight,
   Platform,
   PixelRatio,
-  TouchableOpacity
+  TouchableOpacity,
+  RefreshControl
 } = React;
 
 var moment = require('moment');
@@ -132,7 +133,8 @@ var GiftedMessenger = React.createClass({
       isLoadingEarlierMessages: false,
       allLoaded: false,
       appearAnim: new Animated.Value(0),
-      showPanel: false
+      showPanel: false,
+      isRefreshing: false
     };
   },
 
@@ -389,6 +391,24 @@ var GiftedMessenger = React.createClass({
     return null;
   },
 
+
+  _postLoadEarlierMessages(messages = [], allLoaded = false) {
+    this.prependMessages(messages);
+    this.setState({
+      isRefreshing: false
+    });
+    if (allLoaded === true) {
+      this.setState({
+        allLoaded: true,
+      });
+    }
+  },
+
+  _onRefresh() {
+    this.setState({isRefreshing: true});
+    this.props.onLoadEarlierMessages(this._data[this._rowIds[this._rowIds.length - 1]], this._postLoadEarlierMessages);
+  },
+
   prependMessages(messages = []) {
     var rowID = null;
     for (let i = 0; i < messages.length; i++) {
@@ -476,13 +496,25 @@ var GiftedMessenger = React.createClass({
         }}
       >
         <ListView
+          ref='listView'
+          dataSource={this.state.dataSource}
+          renderRow={this.renderRow}
+
           //accessible={true}
           //onAccessibilityTap={this._onAccessibilityTap}
           onResponderMove={this._onAccessibilityTap}
 
-          ref='listView'
-          dataSource={this.state.dataSource}
-          renderRow={this.renderRow}
+          //refreshControl={
+          //  <RefreshControl
+          //    refreshing={this.state.isRefreshing}
+          //    onRefresh={this._onRefresh}
+          //    tintColor="#ff0000"
+          //    title="Loading..."
+          //    colors={['#ff0000', '#00ff00', '#0000ff']}
+          //    progressBackgroundColor="#ffff00"
+          //  />
+          //}
+
           renderHeader={this.renderLoadEarlierMessages}
           onLayout={(event) => {
             var layout = event.nativeEvent.layout;
