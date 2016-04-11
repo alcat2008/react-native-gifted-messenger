@@ -1,9 +1,6 @@
 'use strict';
 
 var React = require('react-native');
-import Message from './Message';
-var GiftedSpinner = require('react-native-gifted-spinner');
-var dismissKeyboard = require('react-native-dismiss-keyboard');
 var {
   Text,
   View,
@@ -18,19 +15,24 @@ var {
   PixelRatio,
   TouchableOpacity,
   RefreshControl
-} = React;
+  } = React;
 
+var GiftedSpinner = require('react-native-gifted-spinner');
+var dismissKeyboard = require('react-native-dismiss-keyboard');
 var moment = require('moment');
-
 var Icon = require('react-native-vector-icons/Ionicons');
-
 var Button = require('react-native-button');
+
+var AutoExpandingTextInput = require('./AutoExpandingTextInput');
+//var Message = require('./Message');
+import Message from './Message';
 
 var GiftedMessenger = React.createClass({
 
   firstDisplay: true,
   listHeight: 0,
   footerY: 0,
+  inputHeight: 0,
 
   getDefaultProps() {
     return {
@@ -64,7 +66,8 @@ var GiftedMessenger = React.createClass({
       renderStatus: false,
       onChangeText: (text) => {},
       autoScroll: false,
-      textInputHeight: 44,
+      defaultTextInputHeight: 44,
+      maxTextInputHeight: 100,
       panelHeight: 200,
     };
   },
@@ -102,7 +105,8 @@ var GiftedMessenger = React.createClass({
     renderStatus: React.PropTypes.bool,
     onChangeText: React.PropTypes.func,
     autoScroll: React.PropTypes.bool,
-    textInputHeight: React.PropTypes.number,
+    defaultTextInputHeight: React.PropTypes.number,
+    maxTextInputHeight: React.PropTypes.number,
     panelHeight: React.PropTypes.number,
   },
 
@@ -116,7 +120,8 @@ var GiftedMessenger = React.createClass({
       //}
     }
 
-    this.listViewMaxHeight = this.props.maxHeight - this.props.textInputHeight;
+    this.inputHeight = this.props.defaultTextInputHeight;
+    this.listViewMaxHeight = this.props.maxHeight - this.inputHeight;
     //this.listViewMaxHeight = this.props.maxHeight - this.props.textInputHeight - this.props.panelHeight;
 
     var ds = new ListView.DataSource({rowHasChanged: (r1, r2) => {
@@ -128,6 +133,7 @@ var GiftedMessenger = React.createClass({
     return {
       dataSource: ds.cloneWithRows([]),
       text: '',
+      textInputHeight: new Animated.Value(this.inputHeight),
       disabled: true,
       height: new Animated.Value(this.listViewMaxHeight),
       isLoadingEarlierMessages: false,
@@ -277,13 +283,15 @@ var GiftedMessenger = React.createClass({
     }
 
     if (nextProps.hideTextInput && !this.props.hideTextInput) {
-      this.listViewMaxHeight += this.props.textInputHeight;
+      //this.listViewMaxHeight += this.props.defaultTextInputHeight;
+      this.listViewMaxHeight += this.inputHeight;
 
       this.setState({
         height: new Animated.Value(this.listViewMaxHeight),
       });
     } else if (!nextProps.hideTextInput && this.props.hideTextInput) {
-      this.listViewMaxHeight -= this.props.textInputHeight;
+      //this.listViewMaxHeight -= this.props.defaultTextInputHeight;
+      this.listViewMaxHeight -= this.inputHeight;
 
       this.setState({
         height: new Animated.Value(this.listViewMaxHeight),
@@ -344,6 +352,8 @@ var GiftedMessenger = React.createClass({
       this.props.handleSend(message, rowID);
       this.onChangeText('');
     }
+
+    this._resetTextInput();
   },
 
   postLoadEarlierMessages(messages = [], allLoaded = false) {
@@ -529,14 +539,18 @@ var GiftedMessenger = React.createClass({
 
           }}
           renderFooter={() => {
-            return <View onLayout={(event)=>{
-              var layout = event.nativeEvent.layout;
-              this.footerY = layout.y;
+            return (
+              <View
+                onLayout={(event) => {
+                  var layout = event.nativeEvent.layout;
+                  this.footerY = layout.y;
 
-              if (this.props.autoScroll) {
-                this.scrollToBottom();
-              }
-            }}></View>
+                  if (this.props.autoScroll) {
+                    this.scrollToBottom();
+                  }
+                }}
+              ></View>
+            );
           }}
 
           style={this.styles.listView}
@@ -560,44 +574,75 @@ var GiftedMessenger = React.createClass({
     );
   },
 
+  _animateTextInput(variation) {
+    this.inputHeight += variation;
+    Animated.timing(this.state.textInputHeight, {
+      toValue: this.inputHeight,
+      duration: 150,
+    }).start();
+
+    this.listHeight -= variation;
+    Animated.timing(this.state.height, {
+      toValue: this.listHeight,
+      duration: 150,
+    }).start();
+  },
+
+  _resetTextInput() {
+    if (this.inputHeight !== this.props.defaultTextInputHeight) {
+      this._animateTextInput(this.props.defaultTextInputHeight - this.inputHeight);
+    }
+  },
+
+  _onChangeHeight(before, after) {
+    console.log('before: ' + before + ' after: ' + after);
+    this._animateTextInput(after - before);
+  },
+
   renderTextInput() {
     if (this.props.hideTextInput === false) {
       return (
-        <Animated.View style={this.styles.textInputContainer}>
-          <TextInput
-            style={this.styles.textInput}
-            placeholder={this.props.placeholder}
-            ref='textInput'
-            onChangeText={this.onChangeText}
-            value={this.state.text}
-            autoFocus={this.props.autoFocus}
-            returnKeyType={this.props.submitOnReturn ? 'send' : 'default'}
-            onSubmitEditing={this.props.submitOnReturn ? this.onSend : null}
-            enablesReturnKeyAutomatically={true}
+        <Animated.View style={{height: this.state.textInputHeight}}>
+          <View style={this.styles.textInputContainer}>
+            <AutoExpandingTextInput
+              minHeight={this.props.defaultTextInputHeight}
+              maxHeight={this.props.maxTextInputHeight}
+              onChangeHeight={this._onChangeHeight}
 
-            blurOnSubmit={false}
-          />
-          <Button
-            style={this.styles.sendButton}
-            styleDisabled={this.styles.sendButtonDisabled}
-            onPress={this.onSend}
-            disabled={this.state.disabled}
-          >
-            {this.props.sendButtonText}
-          </Button>
+              style={this.styles.textInput}
+              placeholder={this.props.placeholder}
+              ref='autoExpandingTextInput'
+              onChangeText={this.onChangeText}
+              value={this.state.text}
+              autoFocus={this.props.autoFocus}
+              returnKeyType={this.props.submitOnReturn ? 'send' : 'default'}
+              onSubmitEditing={this.props.submitOnReturn ? this.onSend : null}
+              enablesReturnKeyAutomatically={true}
+              multiline={true}
+              blurOnSubmit={false}
+            />
 
-          <TouchableOpacity
-            onPress={this._handleMore}
-          >
-            <Icon style={{
+            <Button
+              style={this.styles.sendButton}
+              styleDisabled={this.styles.sendButtonDisabled}
+              onPress={this.onSend}
+              disabled={this.state.disabled}
+            >
+              {this.props.sendButtonText}
+            </Button>
+
+            <TouchableOpacity
+              onPress={this._handleMore}
+            >
+              <Icon style={{
               //borderWidth: 2,
               flex: 1,
               paddingTop: 7,
               paddingLeft: 6,
               paddingRight: 6
             }} name="ios-plus-outline" size={30} color="#900" />
-          </TouchableOpacity>
-
+            </TouchableOpacity>
+          </View>
         </Animated.View>
       );
     }
@@ -715,7 +760,6 @@ var GiftedMessenger = React.createClass({
     );
   },
 
-
   componentWillMount() {
     this.styles = {
       container: {
@@ -726,24 +770,28 @@ var GiftedMessenger = React.createClass({
         flex: 1,
       },
       textInputContainer: {
-        height: 44,
+        //height: 20,
         borderTopWidth: 1 / PixelRatio.get(),
         borderBottomWidth: 1 / PixelRatio.get(),
         borderColor: '#b2b2b2',
         flexDirection: 'row',
+        alignItems: 'flex-end',
         paddingLeft: 10,
         //paddingRight: 10,
-        //borderWidth: 5
+        //borderWidth: 5,
+        //flex: 1
       },
       textInput: {
-        alignSelf: 'center',
-        height: 30,
+        alignSelf: 'flex-end',
+        //height: 30,
         width: 100,
         backgroundColor: '#FFF',
         flex: 1,
         padding: 0,
         margin: 0,
         fontSize: 15,
+        borderWidth: 3,
+        borderColor: 'yellow'
       },
       sendButton: {
         marginTop: 11,
