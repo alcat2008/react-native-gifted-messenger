@@ -59,16 +59,17 @@ var GiftedMessenger = React.createClass({
       onImagePress: null,
       onMessageLongPress: null,
       hideTextInput: false,
-      keyboardDismissMode: 'on-drag',
-      keyboardShouldPersistTaps: true,
+      //keyboardDismissMode: 'on-drag',
+      keyboardDismissMode: 'interactive',
+      keyboardShouldPersistTaps: false,
       submitOnReturn: false,
       forceRenderImage: false,
       renderStatus: false,
       onChangeText: (text) => {},
       autoScroll: false,
-      defaultTextInputHeight: 44,
+      defaultTextInputHeight: 60,
       maxTextInputHeight: 100,
-      panelHeight: 200,
+      panelHeight: 120,
     };
   },
 
@@ -381,13 +382,21 @@ var GiftedMessenger = React.createClass({
         if (this.state.isLoadingEarlierMessages === true) {
           return (
             <View style={this.styles.loadEarlierMessages}>
-              <GiftedSpinner />
+              <Spinner />
             </View>
           );
         } else {
           return (
             <View style={this.styles.loadEarlierMessages}>
               <Button
+                containerStyle={{
+                  borderRadius: 0,
+                  backgroundColor: 'transparent',
+                  paddingHorizontal: 12,
+                  height: 47,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
                 style={this.styles.loadEarlierMessagesButton}
                 onPress={() => {this.preLoadEarlierMessages()}}
               >
@@ -599,17 +608,90 @@ var GiftedMessenger = React.createClass({
     this._animateTextInput(after - before);
   },
 
+  _renderIcon() {
+    if (this.state.disabled) {
+      return (
+        <TouchableOpacity
+          style={{
+            flex: 1,
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+          }}
+          onPress={this._handleMore}
+        >
+          <Icon
+            name="ios-plus-outline"
+            size={40}
+            color="#0f60b1"
+          />
+        </TouchableOpacity>
+      );
+    }
+
+    return (
+      <View
+        style={{
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Button
+          containerStyle={{
+            justifyContent: 'center',
+            borderRadius: 6,
+            backgroundColor: '#0f60b1',
+            paddingHorizontal: 10,
+            height: this.props.defaultTextInputHeight - 20,
+          }}
+          style={{
+            fontSize: 15,
+            letterSpacing: 1
+          }}
+          styleDisabled={this.styles.sendButtonDisabled}
+          onPress={this.onSend}
+          disabled={this.state.disabled}
+        >
+          {this.props.sendButtonText}
+        </Button>
+      </View>
+
+    );
+  },
+
   renderTextInput() {
     if (this.props.hideTextInput === false) {
       return (
         <Animated.View style={{height: this.state.textInputHeight}}>
-          <View style={this.styles.textInputContainer}>
+          <View
+            style={{
+              flex: 1,
+              borderTopWidth: 3 / PixelRatio.get(),
+              borderBottomWidth: 3 / PixelRatio.get(),
+              borderColor: '#0f263d',
+              flexDirection: 'row',
+              alignItems: 'flex-start',
+              paddingTop: 8,
+              backgroundColor: '#153757',
+            }}
+          >
             <AutoExpandingTextInput
-              minHeight={this.props.defaultTextInputHeight}
+              minHeight={this.props.defaultTextInputHeight - 20}
               maxHeight={this.props.maxTextInputHeight}
               onChangeHeight={this._onChangeHeight}
 
-              style={this.styles.textInput}
+              style={{
+                //alignSelf: 'flex-end',
+                flex: 4,
+                padding: 0,
+                fontSize: 15,
+                marginLeft: 10,
+                marginRight: 0,
+                //marginVertical: 10,
+                borderRadius: 6,
+                backgroundColor: '#0a1926',
+                color: 'white',
+              }}
               placeholder={this.props.placeholder}
               ref='autoExpandingTextInput'
               onChangeText={this.onChangeText}
@@ -621,27 +703,7 @@ var GiftedMessenger = React.createClass({
               multiline={true}
               blurOnSubmit={false}
             />
-
-            <Button
-              style={this.styles.sendButton}
-              styleDisabled={this.styles.sendButtonDisabled}
-              onPress={this.onSend}
-              disabled={this.state.disabled}
-            >
-              {this.props.sendButtonText}
-            </Button>
-
-            <TouchableOpacity
-              onPress={this._handleMore}
-            >
-              <Icon style={{
-              //borderWidth: 2,
-              flex: 1,
-              paddingTop: 7,
-              paddingLeft: 6,
-              paddingRight: 6
-            }} name="ios-plus-outline" size={30} color="#900" />
-            </TouchableOpacity>
+            {this._renderIcon()}
           </View>
         </Animated.View>
       );
@@ -763,40 +825,10 @@ var GiftedMessenger = React.createClass({
   componentWillMount() {
     this.styles = {
       container: {
-        flex: 1,
-        backgroundColor: '#FFF',
+        flex: 1
       },
       listView: {
         flex: 1,
-      },
-      textInputContainer: {
-        //height: 20,
-        borderTopWidth: 1 / PixelRatio.get(),
-        borderBottomWidth: 1 / PixelRatio.get(),
-        borderColor: '#b2b2b2',
-        flexDirection: 'row',
-        alignItems: 'flex-end',
-        paddingLeft: 10,
-        //paddingRight: 10,
-        //borderWidth: 5,
-        //flex: 1
-      },
-      textInput: {
-        alignSelf: 'flex-end',
-        //height: 30,
-        width: 100,
-        backgroundColor: '#FFF',
-        flex: 1,
-        padding: 0,
-        margin: 0,
-        fontSize: 15,
-        borderWidth: 3,
-        borderColor: 'yellow'
-      },
-      sendButton: {
-        marginTop: 11,
-        marginLeft: 10,
-        //borderWidth: 2
       },
       date: {
         color: '#aaaaaa',
@@ -826,7 +858,10 @@ var GiftedMessenger = React.createClass({
       panelContainer: {
         alignItems: 'center',
         justifyContent: 'space-around',
-        flexDirection: 'row'
+        flexDirection: 'row',
+        backgroundColor: '#153757',
+        paddingTop: 5,
+        flex: 1
       },
       panelItem: {
         flex: 1,
@@ -845,7 +880,7 @@ var GiftedMessenger = React.createClass({
       },
       panelText: {
         fontSize: 14,
-        //color: ''
+        color: '#0f60b1'
       }
     };
 

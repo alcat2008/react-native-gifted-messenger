@@ -101,6 +101,8 @@ var GiftedMessengerExample = React.createClass({
       <GiftedMessenger
         ref={(c) => this._GiftedMessenger = c}
 
+        style={{ backgroundColor: '#15263A' }}
+
         styles={{
           bubbleRight: {
             marginLeft: 70,

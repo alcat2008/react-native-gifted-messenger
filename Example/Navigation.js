@@ -19,15 +19,15 @@ var Navigation = React.createClass({
           }
           return Navigator.SceneConfigs.FloatFromRight;
         }}
-        
-        sceneStyle={{paddingTop: (Platform.OS === 'android' ? 56 : 64)}}
-        
+
+        sceneStyle={{paddingTop: (Platform.OS === 'android' ? 44 : 64)}}
+
         navigationBar={this._renderNavBar()}
       />
     );
   },
   _renderNavBar() {
-    var _self = this;    
+    var _self = this;
     var routeMapper = {
       LeftButton(route, navigator, index, navState) {
         return null;
@@ -42,8 +42,8 @@ var Navigation = React.createClass({
     return (
       <Navigator.NavigationBar
         style={{
-          backgroundColor: '#007aff',
-          alignItems: 'center',        
+          backgroundColor: '#1151B1',
+          alignItems: 'center',
         }}
         routeMapper={routeMapper}
       />
