@@ -382,7 +382,7 @@ var GiftedMessenger = React.createClass({
         if (this.state.isLoadingEarlierMessages === true) {
           return (
             <View style={this.styles.loadEarlierMessages}>
-              <Spinner />
+              <GiftedSpinner />
             </View>
           );
         } else {
